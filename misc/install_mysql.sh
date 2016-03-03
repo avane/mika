@@ -11,6 +11,23 @@ killall -9 mysqld mysqld_safe
 
 yum install -y mysql mysql-server
 
+echo "
+[mysqld]
+datadir=$MY_DIR
+socket=$MY_DIR/mysql.sock
+user=mysql
+symbolic-links=0
+port=53306
+character-set-server=utf8
+character-set-filesystem=utf8
+[mysqld_safe]
+log-error=$LOG_DIR/mysqld.log
+pid-file=$MY_DIR/mysqld.pid
+[mysql]
+no-auto-rehash
+socket=$MY_DIR/mysql.sock
+" >$ETC_DIR/my.cnf
+
 [ -e /etc/my.cnf ] && mv -f /etc/my.cnf /etc/my.cnf.bk.`date +%Y%m%d-%H%M%S`
 ln -s $ETC_DIR/my.cnf /etc/my.cnf
 /usr/bin/mysql_install_db --verbose --skip-name-resolve --datadir=$MY_DIR --defaults-file=/etc/my.cnf
@@ -29,4 +46,3 @@ update user set host='%' where user='root';
 update user set host='%' where user='$MY_USER';
 flush privileges;" |
 mysql -S$MY_SOCK -h$MY_HOST -P$MY_PORT -u$MY_ROOT_USER -p$MY_ROOT_PASS
-
